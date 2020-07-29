@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todo_list</title>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/http-vue-loader"></script>
+    <script src="https://kit.fontawesome.com/ace1ab2931.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="stylesheet" href="css/all.css"> -->
+  <style>
+    .now_choose_li{
+    background-color: darkseagreen;
+    }
+    .now_choose_li a{
+    color: #2F4862;
+    }
+
+
+  </style> 
+</head>
+<body>
+    
+   <div id="app" class="container">
+       {{filter_todos}} {{nocompleted}}
+    <div class="listBox">
+    <div class="listUp">    
+        <h3>To-Do List</h3>
+        <div class="inputText">
+            <input type="text" name="text" id="text" class="text_in" v-model="new_todo"  @keyup.enter="add_todo">        
+        </div>
+        <div class="add icon" @click="add_todo"><i class="fas fa-plus"></i></div>
+    </div>
+
+    <div class="tapNav">
+        <ol>
+            <li :class="{now_choose_li: visibility == 'all'}"><a href="#" @click="visibility = 'all'">全部</a></li>
+            <li :class="{now_choose_li: visibility == 'active'}"><a href="#" @click="visibility = 'active'">進行中</a></li>
+            <li :class="{now_choose_li: visibility == 'completed'}"><a href="#" @click="visibility = 'completed'">已完成</a></li>
+        </ol>
+    </div>
+    <div class="content">
+        <div class="listContent" v-for="(item,key) in filter_todos">
+            <div class="icon_check" @dblclick="edit_it(item)">
+                <input type="checkbox" :id="item.id"  v-model="item.completed">
+                <i class="fas fa-check-circle check_on"></i>
+                <label class="icon" :for="item.id" >{{item.value}}</label>
+                <input class="editInput" type="text" v-model="editTitle" @keyup.enter="editDone(item)"  @keyup.esc="editcancel()" v-if="item.id === editList.id">
+            </div>
+            <div class="icon icon_trash" @click="remove">            
+                <i class="far fa-trash-alt"></i>
+            </div>
+        </div>
+
+    </div>
+    
+
+    </div>
+   </div> 
+
+   <script>
+       var app= new Vue({
+           el:'#app',
+           data:{
+               new_todo:'',
+               todos:[{
+                   id:'123',
+                   value:'Hello',
+                   completed:false
+               }],
+               visibility: 'all',
+               editList:{},
+               editTitle:{},
+           },
+           methods: {
+               add_todo:function(){
+                   var list_value = this.new_todo.trim();
+                   var timestamp = Math.floor(Date.now());
+                   if(!list_value){
+                       return;
+                   }else{
+                       this.todos.push({
+                           id:timestamp,
+                           value:list_value,
+                           completed:false
+                       });
+                       this.new_todo ='';
+                    //    console.log( this.todos);
+                   }
+               },
+               remove:function(todos){
+                   var vm  = this;
+                   var del_index = vm.todos.findIndex(function(item,key){
+                       return todos.id === item.id;
+                   })
+                   this.todos.splice(del_index,1);
+               },
+               edit_it:function(item){
+                   this.editList = item;
+                   this.editTitle = item.value;
+                //    console.log( this.editList);
+
+               },
+               editDone:function(item){
+                   item.value = this.editTitle;
+                   this.editTitle='';
+                   this.editList='';
+               },
+               editcancel:function(){
+                   this.editList ='';
+               }
+           },
+           computed: {
+               filter_todos:function(){
+                   if( this.visibility == 'all'){
+                        return this.todos;
+                   }
+                   else if( this.visibility == 'active'){
+                        new_todos = [];
+                        this.todos.forEach(function(item){
+                            if(!item.completed){
+                                new_todos.push(item);
+                            }
+                        });
+                        return new_todos;
+                   }
+                   else if(this.visibility == 'completed'){
+                    new_todos = [];
+                        this.todos.forEach(function(item){
+                            if(item.completed){
+                                new_todos.push(item);
+                            }
+                        });
+                        return new_todos;
+                   }
+                  
+            },
+               nocompleted: function(){
+               return this.todos.filter(function(item){
+                   return !item.completed
+               }).length;
+            }
+           },
+           
+       })
+
+   </script>
+</body>
+</html>
